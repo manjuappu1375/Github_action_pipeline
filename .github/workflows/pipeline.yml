@@ -36,7 +36,6 @@ jobs:
 
       - name: Run ESLint
         run: npm run lint
-# ✅ REPLACE WITH THIS
 - name: Notify Slack on failure
   if: failure()
   uses: slackapi/slack-github-action@v2.0.0
