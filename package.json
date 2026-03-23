@@ -295,7 +295,9 @@
     "yocto-queue": "^0.1.0"
   },
   "devDependencies": {
-    "eslint": "^10.1.0",
+    "@eslint/js": "^10.0.1",
+    "eslint": "^8.57.1",
+    "globals": "^17.4.0",
     "jest": "^30.3.0"
   },
   "scripts": {
