@@ -36,16 +36,15 @@ jobs:
 
       - name: Run ESLint
         run: npm run lint
-
-      - name: Notify Slack on failure
-        if: failure()
-        uses: slackapi/slack-github-action@v2.0.0
-        with:
-          payload: |
-            {"text": ":x: *Lint FAILED* on `${{ github.ref_name }}`\nRepo: ${{ github.repository }}\nBy: ${{ github.actor }}"}
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+# ✅ REPLACE WITH THIS
+- name: Notify Slack on failure
+  if: failure()
+  uses: slackapi/slack-github-action@v2.0.0
+  with:
+    webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+    webhook-type: incoming-webhook
+    payload: |
+      {"text": "your message here"}
 
 # ─── JOB 2: SONARQUBE SAST ─────────────────────────────────────
   sonarqube:
