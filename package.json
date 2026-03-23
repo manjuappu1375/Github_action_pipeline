@@ -1,0 +1,27 @@
+{
+  "name": "github-actions-pipeline",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "eslint": "^10.1.0",
+    "jest": "^30.3.0",
+    "supertest": "^7.2.2"
+  }
+  {
+  "scripts": {
+    "start": "node server.js",
+    "test": "jest --coverage",
+    "lint": "eslint . --ext .js"
+  }
+}
+}
