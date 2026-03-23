@@ -11,41 +11,43 @@ permissions:
   contents: read
 
 env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
   IMAGE_TAG: ${{ github.sha }}
 
 jobs:
 
-# ─── JOB 1: LINT ───────────────────────────────────────────────
-lint:
-  name: Lint
-  runs-on: ubuntu-latest
-  steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        persist-credentials: false
+  # ─── JOB 1: LINT ───────────────────────────────────────────────
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-        cache: 'npm'
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
 
-    - name: Install dependencies
-      run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
-    - name: Run ESLint
-      run: npm run lint
+      - name: Run ESLint
+        run: npm run lint
 
-    - name: Notify Slack on failure
-      if: failure()
-      uses: slackapi/slack-github-action@v2.0.0
-      with:
-        webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
-        webhook-type: incoming-webhook
-        payload: |
-          {"text": "❌ Lint failed on ${{ github.repository }}"}
-# ─── JOB 2: SONARQUBE SAST ─────────────────────────────────────
+      - name: Notify Slack on failure
+        if: failure()
+        uses: slackapi/slack-github-action@v2.0.0
+        with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
+          payload: |
+            {"text": ":x: *Lint FAILED* on `${{ github.ref_name }}`\nRepo: ${{ github.repository }}\nBy: ${{ github.actor }}"}
+
+  # ─── JOB 2: SONARQUBE SAST ─────────────────────────────────────
   sonarqube:
     name: SonarQube SAST
     runs-on: ubuntu-latest
@@ -77,13 +79,12 @@ lint:
         if: failure()
         uses: slackapi/slack-github-action@v2.0.0
         with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
           payload: |
             {"text": ":warning: *SonarQube Quality Gate FAILED* on `${{ github.ref_name }}`\nCheck: https://sonarcloud.io"}
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
 
-# ─── JOB 3: DOCKER BUILD ───────────────────────────────────────
+  # ─── JOB 3: DOCKER BUILD ───────────────────────────────────────
   docker-build:
     name: Docker Build
     runs-on: ubuntu-latest
@@ -119,13 +120,12 @@ lint:
         if: failure()
         uses: slackapi/slack-github-action@v2.0.0
         with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
           payload: |
             {"text": ":hammer: *Docker Build FAILED* on `${{ github.ref_name }}` by ${{ github.actor }}"}
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
 
-# ─── JOB 4: TRIVY SCAN ─────────────────────────────────────────
+  # ─── JOB 4: TRIVY SCAN ─────────────────────────────────────────
   trivy-scan:
     name: Trivy Container Scan
     runs-on: ubuntu-latest
@@ -175,13 +175,12 @@ lint:
         if: failure()
         uses: slackapi/slack-github-action@v2.0.0
         with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
           payload: |
             {"text": ":shield: *Trivy found HIGH/CRITICAL CVEs* on `${{ github.ref_name }}`!\nMerge is BLOCKED. Check GitHub Security tab."}
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
 
-# ─── JOB 5: PUSH TO ECR ────────────────────────────────────────
+  # ─── JOB 5: PUSH TO ECR ────────────────────────────────────────
   push-ecr:
     name: Push to ECR
     runs-on: ubuntu-latest
@@ -219,13 +218,12 @@ lint:
         if: failure()
         uses: slackapi/slack-github-action@v2.0.0
         with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
           payload: |
             {"text": ":x: *ECR Push FAILED* on `${{ github.ref_name }}` — deployment aborted."}
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
 
-# ─── JOB 6: DEPLOY TO EKS ──────────────────────────────────────
+  # ─── JOB 6: DEPLOY TO EKS ──────────────────────────────────────
   deploy-eks:
     name: Deploy to EKS
     runs-on: ubuntu-latest
@@ -273,18 +271,16 @@ lint:
         if: success()
         uses: slackapi/slack-github-action@v2.0.0
         with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
           payload: |
             {"text": ":rocket: *Deployment SUCCESSFUL!*\nRepo: ${{ github.repository }}\nBranch: `${{ github.ref_name }}`\nCommit: `${{ github.sha }}`\nBy: ${{ github.actor }}"}
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
 
       - name: Notify Slack on failure
         if: failure()
         uses: slackapi/slack-github-action@v2.0.0
         with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
           payload: |
             {"text": ":fire: *EKS Deployment FAILED!*\nRepo: ${{ github.repository }}\nBranch: `${{ github.ref_name }}`\nRollback required!"}
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
