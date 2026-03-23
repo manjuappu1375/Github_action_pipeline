@@ -23,5 +23,18 @@
     "test": "jest --coverage",
     "lint": "eslint . --ext .js"
   }
+  {
+  "name": "github-actions-pipeline",
+  "version": "1.0.0",
+  "description": "DevOps pipeline project",
+  "main": "index.js",
+  "scripts": {
+    "lint": "eslint ."
+  },
+  "devDependencies": {
+    "jest": "^7.2.2",
+    "eslint": "^8.0.0"
+  }
+}
 }
 }
