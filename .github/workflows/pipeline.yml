@@ -15,38 +15,6 @@ env:
   IMAGE_TAG: ${{ github.sha }}
 
 jobs:
-
-  # ─── JOB 1: LINT ───────────────────────────────────────────────
-  lint:
-    name: Lint
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      # - name: Run ESLint
-      #   run: npm run lint
-
-      - name: Notify Slack on failure
-        if: failure()
-        uses: slackapi/slack-github-action@v2.0.0
-        with:
-          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
-          webhook-type: incoming-webhook
-          payload: |
-            {"text": ":x: *Lint FAILED* on `${{ github.ref_name }}`\nRepo: ${{ github.repository }}\nBy: ${{ github.actor }}"}
-
   # ─── JOB 2: SONARQUBE SAST ─────────────────────────────────────
   sonarqube:
     name: SonarQube SAST
